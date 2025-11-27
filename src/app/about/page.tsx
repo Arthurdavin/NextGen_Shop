@@ -11,7 +11,7 @@ const members = [
   { name: "Member 3", position: "Marketing", img: "/kormva.png", socials: { facebook: "https://www.facebook.com/kormvong.vaa", github: "https://github.com/Kormvaa" } },
   { name: "Member 4", position: "Marketing", img: "/somrach.png", socials: { facebook: "https://www.facebook.com/share/14R55g2nn8G/", github: "https://github.com/SamrachHub" } },
   { name: "Member 5", position: "Support", img: "/koghour.png", socials: { facebook: "https://www.facebook.com/k.ng.h.ur/", github: "https://github.com/KONGHOUR" } },
-  { name: "Member 6", position: "Editor", img: "/borey1.png", socials: { facebook: "#", github: "#" } },
+  { name: "Member 6", position: "Editor", img: "/borey1.png", socials: { facebook: "https://www.facebook.com/share/17Yk2Ly4pE/?mibextid=wwXIfr", github: "#" } },
 ];
 
 const values = [

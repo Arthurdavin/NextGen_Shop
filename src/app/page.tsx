@@ -9,8 +9,44 @@ import { BestSell } from '@/components/sales/BestSell';
 
 
 export const metadata = {
-  title: 'NextGen-Shop',
-  description: 'Your Ultimate Online Store for Electronics and Gadgets',
+  title: "Home | NextGen Shop",
+  description:
+    "Discover the latest electronics, gadgets, smartphones, audio gear, and lifestyle products at NextGen Shop. Enjoy flash sales, top categories, and new arrivals updated daily.",
+  keywords: [
+    "nextgen shop",
+    "flash sales",
+    "online shopping",
+    "electronics",
+    "gadgets",
+    "smartphones",
+    "new arrivals",
+    "best selling products",
+    "tech deals",
+    "ecommerce"
+  ],
+  openGraph: {
+    title: "NextGen Shop - Your Ultimate Online Store",
+    description:
+      "Explore trending electronics, gadgets, smartphones, and home essentials at unbeatable prices. Shop smarter with NextGen Shop.",
+    url: "https://next-gen-shop-cplw.vercel.app",
+    siteName: "NextGen Shop",
+    type: "website",
+    images: [
+      {
+        url: "/metadate.png",
+        width: 1200,
+        height: 630,
+        alt: "NextGen Shop Banner",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NextGen Shop",
+    description:
+      "Shop electronics, gadgets, and lifestyle products at the best prices — only at NextGen Shop.",
+    images: ["/metadatax.png"],
+  },
 };
 
 export default function Home() {
