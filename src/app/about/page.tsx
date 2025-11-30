@@ -4,6 +4,7 @@
 import React from "react";
 import { Facebook, Github, Users } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const members = [
   { name: "Member 1", position: "Developer", img: "/davin.jpg", socials: { facebook: "https://www.facebook.com/share/1HH3eGX4ZV/?mibextid=wwXIfr", github: "https://github.com/Arthurdavin" } },
@@ -23,10 +24,7 @@ const values = [
 
 const SocialLinks = ({ socials }: any) => (
   <div className="flex justify-center gap-4 mt-3 text-gray-600 dark:text-gray-300">
-    {[
-      { icon: Facebook, link: socials.facebook },
-      { icon: Github, link: socials.github },
-    ].map((s, i) => (
+    {[{ icon: Facebook, link: socials.facebook }, { icon: Github, link: socials.github }].map((s, i) => (
       <a
         key={i}
         href={s.link}
@@ -39,16 +37,27 @@ const SocialLinks = ({ socials }: any) => (
   </div>
 );
 
-
 const ValueCard = ({ title, desc }: any) => (
-  <div className="bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all p-6 rounded-xl border border-gray-100 dark:border-gray-700">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.4 }}
+    className="bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all p-6 rounded-xl border border-gray-100 dark:border-gray-700"
+  >
     <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">{title}</h3>
     <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{desc}</p>
-  </div>
+  </motion.div>
 );
 
 const TeamCard = ({ member }: any) => (
-  <div className="text-center group p-5 border border-gray-200 dark:border-gray-700 rounded-2xl hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.4 }}
+    className="text-center group p-5 border border-gray-200 dark:border-gray-700 rounded-2xl hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800"
+  >
     <div className="overflow-hidden rounded-xl">
       <Image
         src={member.img}
@@ -58,12 +67,10 @@ const TeamCard = ({ member }: any) => (
         className="mx-auto rounded-xl object-cover group-hover:scale-105 transition-all duration-500"
       />
     </div>
-
     <h3 className="mt-4 font-semibold text-lg text-gray-900 dark:text-gray-100">{member.name}</h3>
     <p className="text-gray-500 dark:text-gray-300 text-sm">{member.position}</p>
-
     <SocialLinks socials={member.socials} />
-  </div>
+  </motion.div>
 );
 
 export default function AboutPage() {
@@ -71,14 +78,16 @@ export default function AboutPage() {
     <div className="max-w-6xl mx-auto px-4 py-16 space-y-20">
 
       {/* HEADER */}
-      <section className="flex flex-col md:flex-row items-center gap-10">
-        
+      <motion.section
+        className="flex flex-col md:flex-row items-center gap-10"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         {/* LEFT - TEXT */}
-        <div className="flex-1 animate-fadeIn">
-          <h1 className="text-4xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">
-            Our Story
-          </h1>
-
+        <div className="flex-1">
+          <h1 className="text-4xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">Our Story</h1>
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
             Founded in 2018, NextGen is a modern shopping marketplace created to redefine 
             how people shop online. Our journey started with a single goal — to bring 
@@ -95,16 +104,23 @@ export default function AboutPage() {
 
         {/* RIGHT - IMAGE */}
         <div className="flex-1">
-          <Image
-            src="/aboutus.png"
-            alt="Our Story"
-            width={650}
-            height={420}
-            className="rounded-xl shadow-lg object-cover w-full h-full animate-fadeIn transition-transform duration-700 ease-in-out hover:scale-105"
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="rounded-xl shadow-lg overflow-hidden"
+          >
+            <Image
+              src="/aboutus.png"
+              alt="Our Story"
+              width={650}
+              height={420}
+              className="rounded-xl object-cover w-full h-full transition-transform duration-700 ease-in-out hover:scale-105"
+            />
+          </motion.div>
         </div>
-
-      </section>
+      </motion.section>
 
       {/* VALUES */}
       <div>

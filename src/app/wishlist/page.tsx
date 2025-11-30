@@ -59,11 +59,8 @@ export default function WishlistPage() {
               >
                 <div className="aspect-square bg-secondary dark:bg-gray-700 flex items-center justify-center relative group">
                   <Image
-                    src={
-                      product.image ||
-                      "/placeholder.svg?height=250&width=250&query=product"
-                    }
-                    alt={product.title}
+                    src={product.image ?? "/placeholder.svg"}
+                    alt={product.title ?? "Product Image"}
                     className="w-full h-full object-cover"
                     width={250}
                     height={250}
@@ -93,11 +90,7 @@ export default function WishlistPage() {
 
                   <button
                     onClick={() => {
-                      addToCart({
-                        ...product,
-                        quantity: 1,
-                        inStock: true,
-                      });
+                      addToCart({ ...product, quantity: 1, inStock: true });
                       removeFromWishlist(product.id);
                     }}
                     className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2"

@@ -1,34 +1,18 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useCart, useWishlist } from "@/lib/store"; // Use wishlist store
-import {
-  flashSalesProducts,
-  bestSellingProducts,
-  newArrivalsProducts,
-} from "@/data/mock-data";
+import { useCart, useWishlist } from "@/lib/store";
+import { useAdminStore } from "@/lib/adminStore";
 import { Heart, ShoppingCart, Star, Truck, Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import Image from "next/image";
 
-type Product = {
-  id: number;
-  title: string;
-  image?: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviews: number;
-  description?: string;
-};
-
 export default function ProductDetailPage() {
   const params = useParams();
   const rawId = params.id;
-  const productId = parseInt(Array.isArray(rawId) ? rawId[0] : rawId ?? "", 10);
-
+  const productId = Number(Array.isArray(rawId) ? rawId[0] : rawId ?? "");
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [wishlistFeedback, setWishlistFeedback] = useState<string | null>(null);
@@ -36,15 +20,19 @@ export default function ProductDetailPage() {
   const addToCart = useCart((state) => state.addToCart);
   const { items: wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
 
-  // Merge all products into one array
-  const allProducts: Product[] = [
-    ...flashSalesProducts,
-    ...bestSellingProducts,
-    ...newArrivalsProducts,
-  ];
+  // Fetch products from Admin store
+  const products = useAdminStore((s) => s.products);
+  const loadSeed = useAdminStore((s) => s.loadSeed);
 
-  // Find product by ID
-  const product = allProducts.find((p) => p.id === productId);
+  useEffect(() => {
+    loadSeed?.();
+  }, [loadSeed]);
+
+  if (isNaN(productId)) {
+    return <div className="min-h-screen flex items-center justify-center text-gray-800 dark:text-gray-200">Invalid Product ID</div>;
+  }
+
+  const product = products.find((p) => p.id === productId);
 
   if (!product) {
     return (
@@ -65,7 +53,7 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     addToCart({
       ...product,
-      image: product.image ?? "/placeholder.svg", // ensure string
+      image: product.image ?? "/placeholder.svg",
       quantity,
       inStock: true,
     });
@@ -84,12 +72,14 @@ export default function ProductDetailPage() {
         ...product,
         quantity: 1,
         inStock: true,
-        image: product.image ?? "/placeholder.svg", // ensure string
+        image: product.image ?? "/placeholder.svg",
       });
       setWishlistFeedback("Added to Wishlist");
     }
     setTimeout(() => setWishlistFeedback(null), 2000);
   };
+
+  const relatedProducts = products.filter((p) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -108,8 +98,8 @@ export default function ProductDetailPage() {
           {/* Product Image */}
           <div className="flex items-center justify-center bg-secondary rounded-lg h-96 md:h-full">
             <Image
-              src={product.image ?? "/placeholder.svg"} // ensure string
-              alt={product.title}
+              src={product.image ?? "/placeholder.svg"}
+              alt={product.title ?? "Product Image"}
               className="h-full w-full object-cover rounded-lg"
               width={900}
               height={900}
@@ -128,11 +118,11 @@ export default function ProductDetailPage() {
                     <Star
                       key={i}
                       size={16}
-                      className={i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}
+                      className={i < Math.floor(product.rating ?? 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+                <span className="text-sm text-muted-foreground">({product.reviews ?? 0} reviews)</span>
               </div>
 
               {/* Price */}
@@ -148,42 +138,26 @@ export default function ProductDetailPage() {
 
             {/* Quantity and Buttons */}
             <div className="space-y-4">
-              {/* Quantity Selector */}
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium">Quantity:</span>
                 <div className="flex items-center border border-border rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 hover:bg-card transition"
-                  >
-                    −
-                  </button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 hover:bg-card transition">−</button>
                   <span className="px-6 py-2 border-l border-r border-border">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 hover:bg-card transition"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 hover:bg-card transition">+</button>
                 </div>
               </div>
 
-              {/* Buttons */}
               <div className="flex gap-4 relative">
-                <Button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                >
+                <Button onClick={handleAddToCart} className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground">
                   <ShoppingCart size={20} className="mr-2" />
                   {isAdded ? "Added to Cart!" : "Add to Cart"}
                 </Button>
 
                 <div className="relative">
                   <Button onClick={toggleWishlist} variant="outline" className="px-6">
-                    <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
+                    <Heart className={isInWishlist ? "text-red-500" : "text-muted-foreground"} size={20} />
                   </Button>
 
-                  {/* Wishlist feedback */}
                   {wishlistFeedback && (
                     <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 text-sm bg-accent text-white px-3 py-1 rounded-lg shadow-md animate-fade-in-out">
                       {wishlistFeedback}
@@ -218,12 +192,12 @@ export default function ProductDetailPage() {
         <div className="mt-16">
           <h2 className="text-2xl font-bold mb-8">Related Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {allProducts.slice(0, 4).map((p) => (
+            {relatedProducts.map((p) => (
               <Link key={p.id} href={`/products/${p.id}`} className="group">
                 <div className="bg-secondary rounded-lg overflow-hidden mb-4 h-48 flex items-center justify-center group-hover:bg-secondary/80 transition-colors">
                   <Image
-                    src={p.image ?? "/placeholder.svg"} // ensure string
-                    alt={p.title}
+                    src={p.image ?? "/placeholder.svg"}
+                    alt={p.title ?? "Product Image"}
                     className="h-full w-full object-cover"
                     width={200}
                     height={200}

@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useCart, useAuth, useWishlist } from "@/lib/store";
 import { SearchBar } from "@/components/Search-bar";
 import { useTheme } from "@/contexts/Theme-provider";
+<Link href="/admin" className="ml-4 text-sm text-gray-700">Admin</Link>
 
 import {
   Heart,

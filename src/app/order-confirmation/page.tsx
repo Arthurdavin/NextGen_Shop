@@ -20,7 +20,9 @@ export default function OrderConfirmationPage() {
         <CheckCircle className="mx-auto mb-6 text-green-500" size={64} />
         
         <h1 className="text-3xl font-bold mb-2">Order Confirmed!</h1>
-        <p className="text-muted-foreground mb-6">Thank you for your purchase, {user?.name}</p>
+        <p className="text-muted-foreground mb-6">
+          Thank you for your purchase{user?.name ? `, ${user.name}` : ''}
+        </p>
         
         <div className="bg-card border border-border rounded-lg p-6 mb-6 text-left space-y-4">
           <div>
@@ -37,7 +39,7 @@ export default function OrderConfirmationPage() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Shipping to</p>
-            <p className="font-semibold">{user?.email}</p>
+            <p className="font-semibold">{user?.email ?? 'N/A'}</p>
           </div>
         </div>
         

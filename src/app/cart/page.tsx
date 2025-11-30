@@ -3,15 +3,14 @@
 import Link from 'next/link';
 import { useCart, useAuth } from '@/lib/store';
 import { Button } from '@/components/ui/Button';
-import { ShoppingCart, Trash2,ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 
 export default function CartPage() {
-  
   const { isLoggedIn } = useAuth();
-  const cart = useCart();
-  const items = cart.items;
-  const subtotal = cart.getCartSubtotal();
+  const { items, removeFromCart, updateQuantity, getCartSubtotal } = useCart();
+
+  const subtotal = getCartSubtotal() ?? 0;
   const shipping = subtotal > 100 ? 0 : 10;
   const tax = Math.round(subtotal * 0.1 * 100) / 100;
   const total = subtotal + shipping + tax;
@@ -30,7 +29,7 @@ export default function CartPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <nav className="border-b border-border px-4 py-4 md:px-8">
@@ -41,10 +40,10 @@ export default function CartPage() {
           </Button>
         </Link>
       </nav>
-      
+
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-12">
         <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-        
+
         {items.length === 0 ? (
           <div className="text-center py-12">
             <ShoppingCart size={48} className="mx-auto text-muted-foreground mb-4 opacity-50" />
@@ -62,8 +61,8 @@ export default function CartPage() {
               {items.map((item) => (
                 <div key={item.id} className="bg-card border border-border rounded-lg p-4 flex gap-4">
                   <Image 
-                    src={item.image || "/placeholder.svg?height=96&width=96&query=product"} 
-                    alt={item.title}
+                    src={item.image ?? "/placeholder.svg"} 
+                    alt={item.title ?? "Product Image"}
                     className="w-24 h-24 object-cover rounded"
                     width={200}
                     height={200}
@@ -73,14 +72,14 @@ export default function CartPage() {
                     <p className="text-destructive font-bold mb-4">${item.price}</p>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => cart.updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         className="px-3 py-1 border border-border rounded hover:bg-secondary transition"
                       >
                         −
                       </button>
                       <span className="px-4">{item.quantity}</span>
                       <button 
-                        onClick={() => cart.updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="px-3 py-1 border border-border rounded hover:bg-secondary transition"
                       >
                         +
@@ -90,7 +89,7 @@ export default function CartPage() {
                   <div className="text-right">
                     <p className="font-bold mb-4">${(item.price * item.quantity).toFixed(2)}</p>
                     <button
-                      onClick={() => cart.removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.id)}
                       className="text-destructive hover:text-destructive/80 transition"
                     >
                       <Trash2 size={20} />
@@ -99,7 +98,7 @@ export default function CartPage() {
                 </div>
               ))}
             </div>
-            
+
             {/* Order Summary */}
             <div className="bg-card border border-border rounded-lg p-6 h-fit">
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>

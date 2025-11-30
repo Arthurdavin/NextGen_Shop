@@ -1,46 +1,52 @@
 'use client';
+
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { ProductCard } from "@/components/products/Product-card";
-import { PRODUCTS, CATEGORIES } from "@/data/mock-data";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, Filter } from "lucide-react";
+import { useAdminStore } from "@/lib/adminStore";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AllProductsPage() {
+  const products = useAdminStore((s) => s.products);
+  const loadSeed = useAdminStore((s) => s.loadSeed);
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("newest");
-  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Detect if the screen is mobile
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // Below lg breakpoint
-    };
+    loadSeed();
+  }, [loadSeed]);
 
-    checkIsMobile();
-    window.addEventListener("resize", checkIsMobile);
-    return () => window.removeEventListener("resize", checkIsMobile);
-  }, []);
+  const categories = useMemo(
+    () => Array.from(new Set(products.map((p) => p.category).filter(Boolean))) as string[],
+    [products]
+  );
 
   const filteredProducts = useMemo(() => {
-    let products = PRODUCTS;
-    
-    // On mobile, always show all products unless a specific category is explicitly selected
-    if (!isMobile || selectedCategory !== null) {
-      if (selectedCategory) {
-        products = products.filter((p) => p.category === selectedCategory);
-      }
+    let list = [...products];
+
+    if (selectedCategory) {
+      list = list.filter((p) => p.category === selectedCategory);
     }
 
-    if (sortBy === "price-low") products = [...products].sort((a, b) => a.price - b.price);
-    else if (sortBy === "price-high") products = [...products].sort((a, b) => b.price - a.price);
-    else if (sortBy === "popular") products = [...products].sort((a, b) => b.rating - a.rating);
-    
-    return products;
-  }, [selectedCategory, sortBy, isMobile]);
+    switch (sortBy) {
+      case "price-low":
+        list.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        list.sort((a, b) => b.price - a.price);
+        break;
+      case "popular":
+        list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+      default:
+        list.sort((a, b) => Number(b.id) - Number(a.id));
+    }
 
-  const handleAllProductsClick = () => {
-    setSelectedCategory(null);
-  };
+    return list;
+  }, [products, selectedCategory, sortBy]);
 
   return (
     <div className="min-h-screen bg-background dark:bg-gray-900">
@@ -57,41 +63,57 @@ export default function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar - Only visible on desktop */}
-          <aside className="hidden lg:block lg:col-span-1">
-            <div className="bg-card dark:bg-gray-800 rounded-lg p-6 border border-border dark:border-gray-700 sticky top-24 space-y-8">
+      {/* Filters for Mobile */}
+      <div className="lg:hidden max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-foreground dark:text-white">All Products</h1>
+        <button
+          className="flex items-center gap-1 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
+          onClick={() => setShowMobileFilters((prev) => !prev)}
+        >
+          <Filter size={18} />
+          <span className="text-sm">Filters</span>
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {showMobileFilters && (
+          <motion.div
+            className="lg:hidden max-w-7xl mx-auto px-4 pb-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="bg-card dark:bg-gray-800 rounded-lg p-4 space-y-4 border border-border dark:border-gray-700">
               <div>
-                <h3 className="font-bold text-lg mb-4 text-foreground dark:text-white">Categories</h3>
-                <div className="flex flex-col space-y-2">
+                <h3 className="font-bold text-lg mb-2 text-foreground dark:text-white">Categories</h3>
+                <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={handleAllProductsClick}
-                    className={`text-left px-3 py-2 rounded transition ${
+                    onClick={() => setSelectedCategory(null)}
+                    className={`px-3 py-1 rounded text-sm transition ${
                       selectedCategory === null
                         ? "bg-primary text-primary-foreground font-semibold"
-                        : "hover:bg-muted dark:hover:bg-gray-700 text-foreground dark:text-gray-200"
+                        : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-foreground dark:text-gray-200"
                     }`}
                   >
-                    All Products
+                    All
                   </button>
-                  {CATEGORIES.map((category) => (
+                  {categories.map((cat) => (
                     <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.name)}
-                      className={`text-left px-3 py-2 rounded transition ${
-                        selectedCategory === category.name
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1 rounded text-sm transition ${
+                        selectedCategory === cat
                           ? "bg-primary text-primary-foreground font-semibold"
-                          : "hover:bg-muted dark:hover:bg-gray-700 text-foreground dark:text-gray-200"
+                          : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-foreground dark:text-gray-200"
                       }`}
                     >
-                      {category.name}
+                      {cat}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className="font-bold text-lg mb-4 text-foreground dark:text-white">Sort By</h3>
+                <h3 className="font-bold text-lg mb-2 text-foreground dark:text-white">Sort By</h3>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -104,92 +126,98 @@ export default function AllProductsPage() {
                 </select>
               </div>
             </div>
-          </aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Mobile Controls */}
-          <div className="lg:hidden col-span-1">
-            <div className="bg-card dark:bg-gray-800 rounded-lg p-6 border border-border dark:border-gray-700 mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground dark:text-white">
-                    Showing all {filteredProducts.length} products
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded border border-input dark:border-gray-600 bg-background dark:bg-gray-700 text-foreground dark:text-gray-200"
-                  >
-                    <option value="newest">Sort: Newest</option>
-                    <option value="price-low">Sort: Price Low to High</option>
-                    <option value="price-high">Sort: Price High to Low</option>
-                    <option value="popular">Sort: Most Popular</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          <section className="lg:col-span-3 w-full">
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold text-foreground dark:text-white mb-2">All Products</h1>
-              <p className="text-muted-foreground dark:text-gray-300">
-                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-
-            {/* Mobile Category Selection - Optional dropdown */}
-            <div className="lg:hidden mb-6">
-              <details className="bg-card dark:bg-gray-800 rounded-lg border border-border dark:border-gray-700">
-                <summary className="flex justify-between items-center p-4 cursor-pointer list-none">
-                  <span className="font-medium text-foreground dark:text-white">
-                    Filter by Category
-                  </span>
-                  <ChevronDown className="w-5 h-5 transition-transform duration-200" />
-                </summary>
-                <div className="p-4 pt-2 space-y-2 max-h-60 overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Sidebar for Desktop */}
+        <aside className="hidden lg:block lg:col-span-1">
+          <div className="bg-card dark:bg-gray-800 rounded-lg p-6 border border-border dark:border-gray-700 sticky top-24 space-y-8">
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-foreground dark:text-white">Categories</h3>
+              <div className="flex flex-col space-y-2">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`text-left px-3 py-2 rounded transition ${
+                    selectedCategory === null
+                      ? "bg-primary text-primary-foreground font-semibold"
+                      : "hover:bg-muted dark:hover:bg-gray-700 text-foreground dark:text-gray-200"
+                  }`}
+                >
+                  All Products
+                </button>
+                {categories.map((cat) => (
                   <button
-                    onClick={handleAllProductsClick}
-                    className={`w-full text-left px-3 py-2 rounded transition ${
-                      selectedCategory === null
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`text-left px-3 py-2 rounded transition ${
+                      selectedCategory === cat
                         ? "bg-primary text-primary-foreground font-semibold"
                         : "hover:bg-muted dark:hover:bg-gray-700 text-foreground dark:text-gray-200"
                     }`}
                   >
-                    All Products
+                    {cat}
                   </button>
-                  {CATEGORIES.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.name)}
-                      className={`w-full text-left px-3 py-2 rounded transition ${
-                        selectedCategory === category.name
-                          ? "bg-primary text-primary-foreground font-semibold"
-                          : "hover:bg-muted dark:hover:bg-gray-700 text-foreground dark:text-gray-200"
-                      }`}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              </details>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-foreground dark:text-white">Sort By</h3>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-3 py-2 rounded border border-input dark:border-gray-600 bg-background dark:bg-gray-700 text-foreground dark:text-gray-200"
+              >
+                <option value="newest">Newest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="popular">Most Popular</option>
+              </select>
+            </div>
+          </div>
+        </aside>
+
+        {/* Products Grid */}
+        <section className="lg:col-span-3 w-full">
+          <div className="mb-6 hidden lg:block">
+            <h1 className="text-4xl font-bold text-foreground dark:text-white mb-2">All Products</h1>
+            <p className="text-muted-foreground dark:text-gray-300">
+              Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.05 } }
+            }}
+          >
+            <AnimatePresence>
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)
+                filteredProducts.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ProductCard product={p} />
+                  </motion.div>
+                ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground dark:text-gray-300 text-lg">
-                    No products found in this category.
-                  </p>
+                  <p className="text-muted-foreground dark:text-gray-300 text-lg">No products found.</p>
                 </div>
               )}
-            </div>
-          </section>
-        </div>
+            </AnimatePresence>
+          </motion.div>
+        </section>
       </div>
     </div>
   );

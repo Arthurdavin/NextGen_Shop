@@ -4,11 +4,12 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
+  name: string;
   rating: number;
   reviews: number;
   discount?: number;
-  description?: string;
-  category?: string;
+  description: string;
+  category: string;
   inStock?: boolean;
 }
 

@@ -14,7 +14,12 @@ export default function OrdersPage() {
     if (!isLoggedIn) router.push('/login');
   }, [isLoggedIn, router]);
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn)
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center text-gray-700 dark:text-gray-200">
+        Redirecting...
+      </div>
+    );
 
   return (
     <main className="min-h-[85vh] bg-gray-50 dark:bg-gray-900 flex items-start justify-center pt-10 pb-16">

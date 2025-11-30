@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { flashSalesProducts } from '@/data/mock-data';
 import { ProductCard } from '@/components/products/Product-card';
+import { motion } from 'framer-motion';
 
 export function BestSell() {
   return (
@@ -25,11 +26,30 @@ export function BestSell() {
           </Link>
         </div>
 
-        {/* Product grid - show only first 4 */}
+        {/* Product grid - animated */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {flashSalesProducts.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} showDiscount={true} />
+          {flashSalesProducts.slice(0, 4).map((product, idx) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: idx * 0.15 }}
+              whileHover={{ scale: 1.03 }}
+              className="rounded-lg"
+            >
+              <ProductCard product={product} showDiscount={true} />
+            </motion.div>
           ))}
+        </div>
+
+        {/* Mobile view link */}
+        <div className="md:hidden text-center">
+          <Link
+            href="/products"
+            className="text-primary hover:underline font-semibold"
+          >
+            View All →
+          </Link>
         </div>
       </div>
     </section>

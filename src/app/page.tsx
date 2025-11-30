@@ -7,7 +7,6 @@ import IPhoneBannerSlider from '@/components/banner/IPhoneBannerSlider';
 import MusicPromoBanner from '@/components/music/MusicPromoBanner';
 import { BestSell } from '@/components/sales/BestSell';
 
-
 export const metadata = {
   title: "Home | NextGen Shop",
   description:
